@@ -1,0 +1,11 @@
+@charset "utf-8";
+
+@import "test2.css";
+
+:root {
+		--brand-color: #88E18E;
+}
+
+.logo {
+		color: var(--brand-color)
+}

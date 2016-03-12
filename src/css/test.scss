@@ -1,0 +1,7 @@
+@charset "utf-8";
+
+@import 'sprite/_num';
+
+.test {
+	@include sprite($img1)
+}
