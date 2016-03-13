@@ -3,6 +3,7 @@ import {DungeonMap, Point} from "./Dungeon";
 import {Chara, Player, Puppeteer} from "./Chara";
 import {Fade} from "./Effect";
 import {Message} from "./Message";
+import {Window} from "./Window";
 
 declare var Group;
 declare var Label;
@@ -18,6 +19,7 @@ export class Main {
 	puppeteer: Puppeteer;
 	stage: any; // Group
 	private message: Message;
+	private window: Window;
 	enterframe: (e) => void;
 	constructor(public game: any) {
 		// フェードイン・フェードアウト用
@@ -46,6 +48,28 @@ export class Main {
 		this.game.keybind(' '.charCodeAt(0), 'space');
 
 		this.message= new Message(game);
+		this.window= new Window(game,{
+            'type': 'item',
+            'x': 50,
+            'y': 20,
+            'data':[
+                {
+                    'name': '薬草',
+                    'desc': 'あああああああ',
+                    'effect': function(){console.log('ok')}
+                },
+                {
+                    'name': '上薬草',
+                    'desc': 'あああああああ',
+                    'effect': function(){console.log('ok')}
+                },
+                {
+                    'name': '特上薬草',
+                    'desc': 'あああああああ',
+                    'effect': function(){console.log('ok')}
+                }
+            ]
+        });
 	}
 	// プレイヤーの動きに合わせてスクロールする
 	scroll() {
