@@ -1037,16 +1037,28 @@
 	var Settings_1 = __webpack_require__(2);
 	var Window = (function () {
 	    function Window(game, array) {
+	        var defaultNum = 0;
+	        var _this = this;
 	        switch (array['type']) {
 	            case 'item':
-	                this.itemWindow(game, array);
+	                _this.itemWindow(game, array, defaultNum);
 	                break;
 	            case 'other':
 	                console.log('それ以外');
 	                break;
 	        }
+	        game.addEventListener('enterframe', function () {
+	            if (game.input.down) {
+	                defaultNum++;
+	                _this.itemWindow(game, array, defaultNum);
+	            }
+	            if (game.input.up) {
+	                defaultNum--;
+	                _this.itemWindow(game, array, defaultNum);
+	            }
+	        });
 	    }
-	    Window.prototype.itemWindow = function (game, itemListArray) {
+	    Window.prototype.itemWindow = function (game, itemListArray, defaultNum) {
 	        var itemWindowWidth = Window.ITEM_WIDTH + Window.WINDOW_PADDING * 2;
 	        var itemWindowHeight = Window.ITEM_HEIGHT * itemListArray['data'].length + Window.WINDOW_PADDING_HEIGHT * 2;
 	        var windowBg = new Sprite(itemWindowWidth, itemWindowHeight);
@@ -1059,10 +1071,13 @@
 	        windowBgS.context.fill();
 	        windowBgS.context.stroke();
 	        windowBg.image = windowBgS;
+	        game.rootScene.removeChild(windowBg);
 	        game.rootScene.addChild(windowBg);
 	        for (var i = 0; i < itemListArray['data'].length; i++) {
 	            var itemList = new Sprite(Window.ITEM_WIDTH, Window.ITEM_HEIGHT);
-	            //itemList.backgroundColor = '#000';
+	            if (i == defaultNum) {
+	                itemList.backgroundColor = 'rgba(255, 255, 255, .2)';
+	            }
 	            itemList.x = windowBg.x + Window.WINDOW_PADDING;
 	            itemList.y = Window.ITEM_HEIGHT * i + windowBg.y + Window.WINDOW_PADDING_HEIGHT;
 	            itemList.opacity = 0.7;
@@ -1073,6 +1088,8 @@
 	            label.text = itemListArray['data'][i]['name'];
 	            label.x = itemList.x + Settings_1.Settings.CHIP_WIDTH / 3;
 	            label.y = itemList.y + 1.5;
+	            game.rootScene.removeChild(itemList);
+	            game.rootScene.removeChild(label);
 	            game.rootScene.addChild(itemList);
 	            game.rootScene.addChild(label);
 	        }
