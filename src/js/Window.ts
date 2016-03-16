@@ -3,6 +3,7 @@ import {Image, Settings, DungeonChip} from "./Settings";
 declare var Sprite;
 declare var Surface;
 declare var Label;
+declare var Scene;
 
 export class Window {
 
@@ -12,71 +13,113 @@ export class Window {
 	static WINDOW_PADDING_HEIGHT = Settings.CHIP_WIDTH / 5;
 	static WINDOW_PADDING = Settings.CHIP_WIDTH / 18;
 
+	private label: any;
+	private itemList: any;
+	private selectNum: number;
 
     constructor(game,array) {
-        let defaultNum = 0;
+        this.selectNum = 0;
         let _this = this;
+
         switch (array['type']){
             case 'item':
-                _this.itemWindow(game,array,defaultNum);
+                _this.itemWindow(game,array);
                 break;
-            case 'other':
-                console.log('それ以外');
+            case 'command':
+                console.log('コマンド');
+                break;
+            default:
+                console.log('デフォルト');
                 break;
         }
 
-        game.addEventListener( 'enterframe', function(){
-            if(game.input.down) {
-                defaultNum ++;
-                _this.itemWindow(game,array,defaultNum);
-            }
-            if(game.input.up) {
-                defaultNum --;
-                _this.itemWindow(game,array,defaultNum);
-            }
+        game.addEventListener('downbuttondown', function(){
+            _this.selectDown();
         });
+
+        game.addEventListener('upbuttondown', function(){
+            _this.selectUp();
+        });
+
 
     }
 
-    itemWindow(game,itemListArray,defaultNum) {
+    selectDown = function (){
+        if(this.selectNum < this.itemList.length-1) {
+            this.selectNum ++;
+        }
+        this.select();
+    }
+
+    selectUp = function (){
+        if(this.selectNum > 0) {
+            this.selectNum --;
+        }
+        this.select();
+    }
+
+    select = function (){
+        console.log(this.selectNum);
+        for (var n = 0; this.itemList.length > n; n++ ){
+            if( n == this.selectNum ) {
+                this.itemList[n].backgroundColor = 'rgba(255, 255, 255, .2)';
+            } else {
+                this.itemList[n].backgroundColor = '';
+            };
+
+        }
+    }
+
+    WindowOpen = function (game) {
+
+    }
+
+    commandWindow = function (game,commandArray) {
+
+    }
+
+    defaultWindow = function (game,windowArray) {
+
+    }
+
+
+    itemWindow = function (game,itemListArray) {
         let itemWindowWidth = Window.ITEM_WIDTH + Window.WINDOW_PADDING * 2;
         let itemWindowHeight = Window.ITEM_HEIGHT * itemListArray['data'].length + Window.WINDOW_PADDING_HEIGHT * 2;
-        let windowBg = new Sprite(itemWindowWidth,itemWindowHeight);
+        let windowBg = new Sprite();
+        let windowBgS = new Surface(itemWindowWidth,itemWindowHeight);
+        this.itemList = [];
+        this.label = [];
+
+        windowBg.height = itemWindowHeight;
+        windowBg.width = itemWindowWidth;
         windowBg.x = itemListArray['x'];
         windowBg.y = itemListArray['y'];
-        let windowBgS = new Surface(itemWindowWidth,itemWindowHeight);
-        windowBgS.context.rect(1, 1, itemWindowWidth - 2 ,itemWindowHeight - 2);
         windowBgS.context.fillStyle = "rgba(0, 0, 0, .8)";
+        windowBgS.context.fillRect (1, 1, itemWindowWidth-2, itemWindowHeight-2);
         windowBgS.context.strokeStyle = "rgb(255, 255, 255)";
-        windowBgS.context.fill();
-        windowBgS.context.stroke();
+        windowBgS.context.strokeRect (1, 1, itemWindowWidth-2, itemWindowHeight-2);
         windowBg.image = windowBgS;
-
-        game.rootScene.removeChild(windowBg);
         game.rootScene.addChild(windowBg);
 
         for (var i = 0; i < itemListArray['data'].length; i++) {
-            let itemList = new Sprite(Window.ITEM_WIDTH,Window.ITEM_HEIGHT);
-            if (i == defaultNum ) {
-                itemList.backgroundColor = 'rgba(255, 255, 255, .2)';
-            }
-            itemList.x = windowBg.x + Window.WINDOW_PADDING;
-            itemList.y = Window.ITEM_HEIGHT * i + windowBg.y + Window.WINDOW_PADDING_HEIGHT;
-    		itemList.opacity = 0.7;
+            this.itemList[i] = new Sprite(Window.ITEM_WIDTH,Window.ITEM_HEIGHT);
+            this.itemList[i].x = windowBg.x + Window.WINDOW_PADDING;
+            this.itemList[i].y = Window.ITEM_HEIGHT * i + windowBg.y + Window.WINDOW_PADDING_HEIGHT;
+    		this.itemList[i].opacity = 0.7;
+            this.label = new Label();
+            this.label.width = Window.ITEM_WIDTH - Window.PADDING;
+            this.label.font = "10px monospace";
+            this.label.color = "#ffffff";
+            this.label.text = itemListArray['data'][i]['name'];
+            this.label.x = this.itemList[i].x + Settings.CHIP_WIDTH / 3;
+            this.label.y = this.itemList[i].y + 1.5;
 
-            let label = new Label();
-            label.width = Window.ITEM_WIDTH - Window.PADDING;
-    		label.font = "10px monospace";
-    		label.color = "#ffffff";
-    		label.text = itemListArray['data'][i]['name'];
-    		label.x = itemList.x + Settings.CHIP_WIDTH / 3;
-    		label.y = itemList.y + 1.5;
-
-            game.rootScene.removeChild(itemList);
-            game.rootScene.removeChild(label);
-            game.rootScene.addChild(itemList);
-    		game.rootScene.addChild(label);
+            game.rootScene.addChild(this.itemList[i]);
+    		game.rootScene.addChild(this.label);
         }
+
+        this.select();
 	}
 
 }
