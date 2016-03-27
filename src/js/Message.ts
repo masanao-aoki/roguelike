@@ -1,4 +1,5 @@
 import {Image, Settings, DungeonChip} from "./Settings";
+import {game} from "./Game";
 
 declare var Group;
 declare var Label;
@@ -12,7 +13,7 @@ export class Message {
 	static MSG_HEIGHT = Settings.CHIP_HEIGHT * 1.5;
 	static MSG_WIDTH = Settings.STAGE_WIDTH - Message.MARGIN * 2;
 	private label: any;
-	constructor(game) {
+	constructor() {
 		let msgbg = new Sprite(Message.MSG_WIDTH, Message.MSG_HEIGHT);
 		let msgbgS = new Surface(Message.MSG_WIDTH, Message.MSG_HEIGHT);
 

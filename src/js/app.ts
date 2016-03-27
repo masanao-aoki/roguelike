@@ -1,15 +1,6 @@
+import {game} from "./Game";
 import {Image, Settings, DungeonChip} from "./Settings";
 import {Main} from "./Main";
-
-declare function enchant();
-declare var Game;
-
-enchant();
-
-let game = new Game(
-	Settings.STAGE_WIDTH,
-	Settings.STAGE_HEIGHT
-);
 
 game.fps = Settings.FPS;
 
@@ -21,7 +12,9 @@ game.preload(
 	Image.MAP0_GIF
 );
 
-game.onload = (e) => {let main = new Main(game);};
+game.onload = (e) => {
+	let main = new Main();
+};
 game.start();
 
 
