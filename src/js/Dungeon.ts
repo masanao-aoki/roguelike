@@ -4,7 +4,7 @@ declare var _;
 
 export class DungeonMap {
 	private map: any; // Map
-	private dungeon: Dungeon;
+	public dungeon: Dungeon;
 	private floor: number = 1;
 	constructor(chipWidth: number, chipHeight: number, image: any) {
 		this.map = new Map(chipWidth, chipHeight);
@@ -18,13 +18,14 @@ export class DungeonMap {
 	}
 	// ランダム位置の取得（プレイヤー初期位置や敵の出現位置で使う）
 	// ※空き地がない場合無限ループになる
-	randomPos(): Point {
-		let pos, collision;
+	randomPoint(): Point {
+		let point, collision;
 		do {
-			pos = this.dungeon.randomPos();
-			collision = this.map.collisionData[pos.y][pos.x];
+			point = this.dungeon.randomPoint();
+			collision = this.map.collisionData[point.y][point.x];
 		} while (collision != 0);
-		return pos;
+
+		return point;
 	}
 	setCollision(x: number, y: number, c: number):void {
 		this.map.collisionData[Math.floor(y / this.map.tileHeight)][Math.floor(x / this.map.tileWidth)] = c;
@@ -58,7 +59,7 @@ export class Point {
 }
 // 矩形（左上頂点、右下頂点を指定）
 class Rect {
-	constructor(
+	constructor (
 		public x0:number,
 		public y0:number,
 		public x1:number,
@@ -85,6 +86,7 @@ class Dungeon {
 	areaList: Area[];
 	pathList: Rect[];
 	map: number[][];
+	stairPoint: Point;
 	collisionData: number[][];
 	constructor(
 		public MAP_W: number,
@@ -111,8 +113,8 @@ class Dungeon {
 		map = this.createAreaList(map);
 
 		// 階段の描画
-		let stairPoint = this.getRandomPosition(map);
-		map[stairPoint.y][stairPoint.x] = DungeonChip.STAIR;
+		this.stairPoint = this.getRandomPoint(map);
+		map[this.stairPoint.y][this.stairPoint.x] = DungeonChip.STAIR;
 
 		return map;
 	}
@@ -171,7 +173,7 @@ class Dungeon {
 	}
 
 	//ランダム部屋の中のでポジションを取得
-	getRandomPosition(map): Point {
+	getRandomPoint(map): Point {
 		let x: number, y: number;
 		do {
 			x = _.random(0, this.MAP_W - 1);
@@ -181,8 +183,8 @@ class Dungeon {
 	}
 
 	// ランダム位置
-	randomPos(): Point {
-		return this.getRandomPosition(this.map);
+	randomPoint(): Point {
+		return this.getRandomPoint(this.map);
 	}
 
 	// マップ表示
@@ -222,9 +224,9 @@ class Dungeon {
 	//	return Math.floor(Math.random() * (max - min) + min);
 	//}
 
-	// 区画分割を行う関数（再帰）
+	// 区画分割を行う関数
 	split(area: Area): Area[] {
-		var split = (area: Area) => {
+		let split = (area: Area) => {
 			// 終了条件
 			if ((area.x1 - area.x0 <= this.MIN_RECT * 2) ||
 				(area.y1 - area.y0 <= this.MIN_RECT * 2) ||
@@ -234,13 +236,13 @@ class Dungeon {
 				return [area];
 			}
 			// 区画の追加
-			var child = new Area(area.x0, area.y0, area.x1, area.y1);
+			let child = new Area(area.x0, area.y0, area.x1, area.y1);
 
-			var dir = _.random(0, 1) ? 'x' : 'y';
-			var areaDir = _.random(area[dir + 0] + this.MIN_RECT, area[dir + 1] - this.MIN_RECT - 1);
+			let dir = _.random(0, 1) ? 'x' : 'y';
+			let areaDir = _.random(area[dir + 0] + this.MIN_RECT, area[dir + 1] - this.MIN_RECT - 1);
 			area[dir + 1] = areaDir;
 			child[dir + 0] = areaDir;
-			var ret = [area, child].map(split);
+			let ret = [area, child].map(split);
 
 			return _.flatten(ret);
 		};
