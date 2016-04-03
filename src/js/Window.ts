@@ -1,4 +1,5 @@
 import {Image, Settings, DungeonChip} from "./Settings";
+import {game} from "./Game";
 
 declare var Sprite;
 declare var Surface;
@@ -17,13 +18,12 @@ export class Window {
 	private itemList: any;
 	private selectNum: number;
 
-    constructor(game,array) {
+    constructor(public windowInfo) {
         this.selectNum = 0;
-        let _this = this;
 
-        switch (array['type']){
+        switch (windowInfo['type']){
             case 'item':
-                _this.itemWindow(game,array);
+                this.itemWindow(this.windowInfo);
                 break;
             case 'command':
                 console.log('コマンド');
@@ -33,57 +33,47 @@ export class Window {
                 break;
         }
 
-        game.addEventListener('downbuttondown', function(){
-            _this.selectDown();
+        game.addEventListener('downbuttondown', () => {
+            this.select(this.selectNum + 1);
         });
 
-        game.addEventListener('upbuttondown', function(){
-            _this.selectUp();
+        game.addEventListener('upbuttondown', () => {
+            this.select(this.selectNum - 1);
         });
 
 
     }
 
-    selectDown = function (){
-        if(this.selectNum < this.itemList.length-1) {
-            this.selectNum ++;
-        }
-        this.select();
+    select(num) {
+        num = Math.min(num, this.windowInfo['data'].length - 1);
+        num = Math.max(num, 0);
+
+        console.log(num+':'+this.windowInfo['data'].length);
+        this.itemListClear();
+        this.itemList[num].backgroundColor = 'rgba(255, 255, 255, .2)';
+        this.selectNum = num;
     }
 
-    selectUp = function (){
-        if(this.selectNum > 0) {
-            this.selectNum --;
-        }
-        this.select();
-    }
-
-    select = function (){
-        console.log(this.selectNum);
-        for (var n = 0; this.itemList.length > n; n++ ){
-            if( n == this.selectNum ) {
-                this.itemList[n].backgroundColor = 'rgba(255, 255, 255, .2)';
-            } else {
-                this.itemList[n].backgroundColor = '';
-            };
-
-        }
+    itemListClear() {
+        this.itemList.forEach((item) => {
+            item.backgroundColor = '';
+        });
     }
 
     WindowOpen = function (game) {
 
     }
 
-    commandWindow = function (game,commandArray) {
+    commandWindow = function (commandArray) {
 
     }
 
-    defaultWindow = function (game,windowArray) {
+    defaultWindow = function (windowArray) {
 
     }
 
 
-    itemWindow = function (game,itemListArray) {
+    itemWindow = function (itemListArray) {
         let itemWindowWidth = Window.ITEM_WIDTH + Window.WINDOW_PADDING * 2;
         let itemWindowHeight = Window.ITEM_HEIGHT * itemListArray['data'].length + Window.WINDOW_PADDING_HEIGHT * 2;
         let windowBg = new Sprite();
@@ -119,7 +109,7 @@ export class Window {
     		game.rootScene.addChild(this.label);
         }
 
-        this.select();
+        this.select(this.selectNum);
 	}
 
 }
